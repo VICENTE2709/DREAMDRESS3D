@@ -8,7 +8,7 @@ require_once(__DIR__ . '/../../config/database.php');
  */
 function crearProducto($nombre, $descripcion, $precio, $tipoID, $imagen, $usuarioID, $modulo_afectado, $ip_acceso, $detalle) {
     $db = Database::connect();
-    $sql = "CALL sp_crear_producto(:nombre, :descripcion, :precio, :tipoID, :imagen, :usuarioID, :modulo_afectado, :ip_acceso, :detalle)";
+    $sql = "CALL sp_insertar_producto(:nombre, :descripcion, :precio, :tipoID, :imagen, :usuarioID, :modulo_afectado, :ip_acceso, :detalle)";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':nombre', $nombre);
     $stmt->bindParam(':descripcion', $descripcion);
@@ -22,8 +22,10 @@ function crearProducto($nombre, $descripcion, $precio, $tipoID, $imagen, $usuari
 
     if ($stmt->execute()) {
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
         return $resultado ?: ['status' => 'ok', 'mensaje' => 'Producto creado correctamente'];
     } else {
+        $stmt->closeCursor();
         return ['status' => 'error', 'mensaje' => 'Error al crear producto'];
     }
 }
@@ -33,7 +35,7 @@ function crearProducto($nombre, $descripcion, $precio, $tipoID, $imagen, $usuari
  */
 function editarProducto($productoID, $nombre, $descripcion, $precio, $tipoID, $imagen, $usuarioID, $modulo_afectado, $ip_acceso, $detalle) {
     $db = Database::connect();
-    $sql = "CALL sp_editar_producto(:productoID, :nombre, :descripcion, :precio, :tipoID, :imagen, :usuarioID, :modulo_afectado, :ip_acceso, :detalle)";
+    $sql = "CALL sp_actualizar_producto(:productoID, :nombre, :descripcion, :precio, :tipoID, :imagen, :usuarioID, :modulo_afectado, :ip_acceso, :detalle)";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':productoID', $productoID);
     $stmt->bindParam(':nombre', $nombre);
@@ -48,8 +50,10 @@ function editarProducto($productoID, $nombre, $descripcion, $precio, $tipoID, $i
 
     if ($stmt->execute()) {
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
         return $resultado ?: ['status' => 'ok', 'mensaje' => 'Producto actualizado correctamente'];
     } else {
+        $stmt->closeCursor();
         return ['status' => 'error', 'mensaje' => 'Error al editar producto'];
     }
 }
@@ -59,7 +63,7 @@ function editarProducto($productoID, $nombre, $descripcion, $precio, $tipoID, $i
  */
 function bajaLogicaProducto($productoID, $usuarioID, $modulo_afectado, $ip_acceso, $detalle) {
     $db = Database::connect();
-    $sql = "CALL sp_baja_producto(:productoID, :usuarioID, :modulo_afectado, :ip_acceso, :detalle)";
+    $sql = "CALL sp_baja_logica_producto(:productoID, :usuarioID, :modulo_afectado, :ip_acceso, :detalle)";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':productoID', $productoID);
     $stmt->bindParam(':usuarioID', $usuarioID);
@@ -69,8 +73,10 @@ function bajaLogicaProducto($productoID, $usuarioID, $modulo_afectado, $ip_acces
 
     if ($stmt->execute()) {
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
         return $resultado ?: ['status' => 'ok', 'mensaje' => 'Producto dado de baja correctamente'];
     } else {
+        $stmt->closeCursor();
         return ['status' => 'error', 'mensaje' => 'Error al dar de baja el producto'];
     }
 }
