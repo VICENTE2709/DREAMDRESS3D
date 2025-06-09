@@ -1,0 +1,54 @@
+# ---------------------------------------------
+# .htaccess DreamDress 3D MVC Procedural
+# Compatible con SUBDIRECTORIO y VirtualHost
+# ---------------------------------------------
+
+# Activar motor de reescritura
+RewriteEngine On
+
+# Detectar el subdirectorio actual
+# RewriteBase /
+RewriteBase /DreamDress3D/public/
+
+# Si tu sistema NO está en la raíz del dominio sino en /DreamDress3D/public/
+# descomenta la siguiente línea y AJUSTA EL PATH (quita comentario si es necesario):
+# RewriteBase /DreamDress3D/public/
+
+# ---------------------------------------------
+# Bloquear acceso directo a carpetas sensibles del backend
+RewriteRule ^(app|config|core)/ - [F,L]
+
+# Permitir acceso a archivos estáticos reales (css, js, imágenes, fuentes)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redirigir todo lo demás al Front Controller y pasar la ruta como parámetro 'route'
+RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
+
+# ---------------------------------------------
+# Seguridad: bloquear acceso directo a archivos de configuración y backups
+<FilesMatch "\.(env|ini|config|log|sql|bak|sh|bat|cmd)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Seguridad: Headers HTTP para prevenir ataques comunes
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+</IfModule>
+
+# Bloquear ejecución de PHP en carpetas públicas de archivos (assets, uploads, imágenes, css, js)
+<FilesMatch "(^|/)(assets|uploads|imagenes|img|css|js)/.*\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Opcional: Prevenir listado de directorios
+Options -Indexes
+
+# ---------------------------------------------
