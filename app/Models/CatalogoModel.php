@@ -3,32 +3,17 @@ require_once(__DIR__ . '/../../config/database.php');
 
 /**
  * Obtener todos los productos del catálogo
- * Consulta directa sin stored procedures
+ * Utiliza el stored procedure sp_listar_catalogo
  */
 function catalogo_obtener_todos() {
     $conn = Database::connect();
 
-    // Consulta JOIN para obtener productos con información completa
-    $sql = "SELECT 
-                p.ProductoID,
-                p.Nombre,
-                p.Descripcion,
-                p.Precio,
-                p.Imagen,
-                tp.Nombre_tipo as TipoProducto,
-                c.Stock,
-                c.Disponible
-            FROM producto p
-            INNER JOIN tipo_producto tp ON p.TipoID = tp.TipoID
-            LEFT JOIN catalogo c ON p.ProductoID = c.ProductoID
-            WHERE c.Disponible = 1 OR c.Disponible IS NULL
-            ORDER BY p.Nombre ASC";
-    
-    $stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare("CALL sp_listar_catalogo()");
     $stmt->execute();
-    
+
     $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+    $stmt->closeCursor();
+
     return $productos;
 }
 
@@ -38,23 +23,17 @@ function catalogo_obtener_todos() {
 function catalogo_obtener_por_id($productoID) {
     $conn = Database::connect();
 
-    $sql = "SELECT 
-                p.ProductoID,
-                p.Nombre,
-                p.Descripcion,
-                p.Precio,
-                p.Imagen,
-                tp.Nombre_tipo as TipoProducto,
-                c.Stock,
-                c.Disponible
-            FROM producto p
-            INNER JOIN tipo_producto tp ON p.TipoID = tp.TipoID
-            LEFT JOIN catalogo c ON p.ProductoID = c.ProductoID
-            WHERE p.ProductoID = :productoID";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':productoID', $productoID, PDO::PARAM_INT);
+    $stmt = $conn->prepare("CALL sp_listar_productos()");
     $stmt->execute();
-    
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->closeCursor();
+
+    foreach ($productos as $producto) {
+        if ($producto['ProductoID'] == $productoID) {
+            return $producto;
+        }
+    }
+
+    return null;
 }
